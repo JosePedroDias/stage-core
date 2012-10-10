@@ -128,17 +128,8 @@
 
         subscribe: function(kind, cb) {
             this._io.sockets.on(kind, cb); // TODO only works on connection?!
-        },
-
-        randomInt: function(max, min) {
-            if (typeof min === 'undefined') { min = 0; }
-            return min + Math.floor( Math.random() * (max - min) );
-        },
-
-        randomElementOfArray: function(arr) {
-            var i = this.randomInt( arr.length );
-            return arr[i];
         }
+        
     };
 
 

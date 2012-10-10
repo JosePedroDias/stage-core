@@ -1,0 +1,39 @@
+body {
+	font-family:		sans-serif;
+}
+
+#ctn {
+	position:			fixed;
+	left:				10px;
+	right:				10px;
+	top:				10px;
+	bottom:				40px;
+	background-color:	#CCF;
+	border-radius:		4px;
+	padding:			0 10px;
+	overflow:			hidden;
+	overflow-y:			auto;
+}
+
+#ctn > p {
+	text-shadow:        0 0 1px rgba(0, 0, 0, 0.75);
+}
+
+#line {
+	position:			fixed;
+	left:				10px;
+	right:				10px;
+	bottom:				10px;
+	width:				95%;
+}
+
+.player {
+	position:			fixed;
+	width:				12px;
+	height:				12px;
+	margin-left:		-6px;
+	margin-top:			-6px;
+	border-radius:      6px;
+	z-index:			2;
+	box-shadow:         0 0 1px rgba(0, 0, 0, 0.75);
+}
