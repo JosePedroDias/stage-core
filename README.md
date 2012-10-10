@@ -78,3 +78,24 @@ JUDGE API
 `onMessage({any} message)`
 
 `onPlay({any} play)`
+
+
+
+ADDITIONAL LIBS
+---------------
+
+### DiscreteMap
+
+`new DiscreteMap({Number} w, {Number} h, [{Array} data], [{Boolean} wrap])`
+`new DiscreteMap({JSON Repr} w)`
+
+`{Number[2]} wrapPosition({Number} x, {Number} y)`
+
+`{any} getCell(x, y)`
+
+`setCell({Number} x, {Number} y, {any} o)`
+
+`{DiscreteMap} clone()`
+
+`{String} toString([{Boolean} spaced])`
+

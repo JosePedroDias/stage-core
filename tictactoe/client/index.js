@@ -66,6 +66,15 @@
             var cEl = getCell(p[0], p[1]);
             cEl.className = o.piece;
         });
+
+        stage.subscribe('reset', function() {
+            var x, y;
+            for (y = 0; y < 3; ++y) {
+                for (x = 0; x < 3; ++x) {
+                    getCell(x, y).className = 'empty';
+                }
+            }
+        });
     };
 
     stage.syncSession(onGameStarting);

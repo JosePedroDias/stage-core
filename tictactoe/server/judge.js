@@ -7,6 +7,55 @@ var DiscreteMap;
 
 
 
+var validateTTTMap = function(map) {
+    var hasSpace = false;
+
+    var i;
+    for (i = 0; i < 9; ++i) {
+        if (!map._d[i]) { hasSpace = true; break; }
+    }
+
+    var pairs = [
+        [ [0, 0], [1, 0] ], // horizontals
+        [ [0, 1], [1, 0] ],
+        [ [0, 2], [1, 0] ],
+
+        [ [0, 0], [0, 1] ], // verticals
+        [ [1, 0], [0, 1] ],
+        [ [2, 0], [0, 1] ],
+
+        [ [0, 0], [1, 1] ], // diagonals
+        [ [2, 0], [-1, 1] ]
+    ];
+
+    var p, pair, o, lastO;
+    for (p = 0; p < 8; ++p) {
+        pair = pairs[p];
+        for (i = 0; i < 3; ++i) {
+            o = map.getCell(
+                pair[0][0] + pair[1][0] * i,
+                pair[0][1] + pair[1][1] * i
+            );
+            if (!o) { break; }
+            if (i === 0) { lastO = o; }
+            else if (lastO !== o) { break; }
+            if (i === 2) {
+                return {
+                    whoWon:   o,
+                    hasSpace: hasSpace
+                };
+            }
+        }
+    }
+
+    return {
+        whoWon:   undefined,
+        hasSpace: hasSpace
+    };
+};
+
+
+
 
 var judge = {
 
@@ -101,6 +150,26 @@ var judge = {
 
         this._state.map.setCell(pos[0], pos[1], session.piece);
         console.log( this._state.map.toString(true) );
+
+        var val = validateTTTMap(this._state.map);
+        console.log(val);
+
+        var msg = '';
+        if (val.whoWon) {
+            msg = ['Player ', session.name, ' (', session.piece, ') won!'].join('');
+            
+        }
+        else if (!val.hasSpace) {
+            msg = 'No one won...';
+        }
+
+        if (msg) {
+            this._stage.broadcast('message', msg);
+            this.stop();
+            this._stage.broadcast('reset', msg);
+            this.start();
+            return;
+        }
 
         var play = {
             piece:  session.piece,
