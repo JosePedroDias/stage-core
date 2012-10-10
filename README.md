@@ -28,11 +28,11 @@ STAGE API (CLIENT)
 
 
 
-`send({String} kind, {Object}o)`
-
 `subscribe({String} kind, {Function} cb)`
 
 `syncSession({Function} cb)`
+
+`send({String} kind, {Object}o)`
 
 
 
@@ -49,11 +49,7 @@ JUDGE API
 
 `stop()`
 
-
-
 -----
-
-
 
 `sortFn`
 
@@ -63,16 +59,22 @@ JUDGE API
 
 
 
+`onPlayerEnter({Object} session)`
+
+`onPlayerExit({Object} session)`
+
+`onPlayerReady({Object} session)`
+
+
+
 `prePlayerUpdates()`
 
-`onPlayerUpdate(session)`
+`onPlayerUpdate({Object} session)`
 
 `postPlayerUpdates()`
 
 
 
-`onPlayerEnter(session)`
+`onMessage({any} message)`
 
-`onPlayerExit(session)`
-
-`onPlayerReady(session)`
+`onPlay({any} play)`

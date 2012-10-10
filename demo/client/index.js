@@ -37,7 +37,7 @@
     };
     
     var onGameStarting = function() {
-        stage.subscribe('msg', onMessage);
+        stage.subscribe('message', onMessage);
         stage.subscribe('pos', onPos);
         addLine('starting...');
         lineEl.focus();
