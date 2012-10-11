@@ -1,16 +1,34 @@
-CONFIGURATION OPTIONS
----------------------
+# CONFIGURATION OPTIONS
 
-    {Number} fps
-    {Number} port
-    {String} rootDir
+by instancing a new stage-core, you can provide an object with options.
+
+    {Number} fps     - number of server frames per second. used only for real-time games.
+    {Number} port    - server port to use
+    {String} rootDir - root directory from which the expected tree is looked for
 
 
 
-STAGE API (SERVER)
-------------------
+# STAGE API (CLIENT)
 
-`send({String} kind, {Object} o, {Socket} socket)`
+One has the stage variable exposed on the client-side. This provides the following properties and methods:
+
+`{Object} ._cfg` - the retrieved game configuration
+
+`{Object} ._session` - the retrieved player profile
+
+
+`syncSession({Function} cb)` - by invoking this method you provide a callback which will be called once to profile synchronization takes place. only after this can the game start.
+
+`send({String} kind, {Object}o)` - this method offers a way for the client to send a message of the given kind to the server. Common kinds are 'play' to submit a game-changing action and 'message' to send a message.
+
+`subscribe({String} kind, {Function} cb)` - by providing stage with a cb, you indicate what to do when a message of the given kind is sent from the server. 
+
+
+
+
+# STAGE API (SERVER)
+
+`send({String} kind, {Object} o, {Object} session)` - 
 
 `broadcast({String} kind, {Object} o)`
 
@@ -18,73 +36,74 @@ STAGE API (SERVER)
         
 
 
+# JUDGE API (SERVER)
 
-STAGE API (CLIENT)
-------------------
+#
 
-`{Object} ._cfg`
+this._state.frameNr
+this._state.
 
-`{Object} ._session`
+## USABLE METHODS
 
+`{Number} getNumReadyPlayers()`
 
+`{Object[]} getReadyPlayers()`
 
-`subscribe({String} kind, {Function} cb)`
+`{Number} getNumWaitingPlayers()`
 
-`syncSession({Function} cb)`
-
-`send({String} kind, {Object}o)`
-
-
-
-JUDGE API
----------
-
-`{Number} getNumberOfSessions()`
-
-`{Object[]} getSessions()`
-
-`{Boolean} isRunning()`
-
-`start()`
-
-`stop()`
-
------
-
-`sortFn`
+`{Object[]} getWaitingPlayers()`
 
 
 
-`init()`
+`{Boolean} isRunning()` - use this to check it the game is running or not
+
+`start()` - once called, moves the judge state machine to the running state. This has different meaning for real-time and turn-based games. For real-time games it means that a timer is set to call a frame loop n times per second.
+For turn-based games it means that the server will notify each player to send play data in round-robin fashion.
+
+`stop()` - once called, stops the game loop.
 
 
 
-`onPlayerEnter({Object} session)`
+## REWRITABLE METHODS
 
-`onPlayerExit({Object} session)`
-
-`onPlayerReady({Object} session)`
+`sortFn` - if provided, this function offers a way for the judge to empose an order to the players. This is probably most useful in turn-based games.
 
 
 
-`prePlayerUpdates()`
+`onPlayerEnter({Object} session)` - this method is called once a player enters the game page. in most games this is in the lobby, not directly to the game.
 
-`onPlayerUpdate({Object} session)`
+`onPlayerExit({Object} session)` - this method is called when a player abandons the game (either due to connectivity issues or deliberate user exit). can occur at lobby or play time.
 
-`postPlayerUpdates()`
-
-
-
-`onMessage({any} message)`
-
-`onPlay({any} play)`
+`onPlayerReady({Object} session)` - this method signals that this player has submitted his updated profile and is ready to play.
 
 
 
-ADDITIONAL LIBS
----------------
+`init()` - this method is called prior to game start, so the server can prepare its state.
+
+
+
+`prePlayerUpdates()` - this method is called prior to a game frame being processed. can be used for many features, such as preparing the game state for player input, simulation etc.
+
+`onPlayerUpdate({Object} session)` - each player is called once per frame. this can process de play data provided by the player, updating its state (i.e. position)
+
+`postPlayerUpdates()` - this method is called after all players are processed. can be used to compute stuff such as collisions / simulation steps. Clients are expected to be thrown a state update broadcast during this stage.
+
+
+
+`onMessage({any} message)` - this method is invoked when a client sends a message. It's up to the server to decide it's visibility and meaning (ex: could just broadcast it, send it to its teammates, use it as a means to change something else)
+
+`onPlay({any} play)` - this method is invoked when a client has data to provide that is expected to change the course of the game. This can be as low-level as a set of game key states/mouse input, etc, commands such as positions, actions etc or any other combination. Notice that its up to the server to validate if the frequency and values given in such messages are valid, i.e., on popular games one may need to through limiting values and throttling conditions on this method so clients can't cheat.
+
+
+
+## ADDITIONAL LIBS
 
 ### DiscreteMap
+
+This class provides a simple API for dealing with discrete 2D maps.
+The constructor supports setting up a w x h empty matrix or feeding back an older one (use toJSON() to serialize a map)
+getCell and setCell offer a way of reading/writing cells.
+toString() can be useful to debug the map state on the console.
 
 `new DiscreteMap({Number} w, {Number} h, [{Array} data], [{Boolean} wrap])`
 `new DiscreteMap({JSON Repr} w)`

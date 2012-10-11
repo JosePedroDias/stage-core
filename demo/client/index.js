@@ -54,7 +54,7 @@
 
         if (dP[0] !== 0 || dP[1] !== 0) {
             console.log('-> ' + dP.join(','));
-            return stage.send('keys', dP);
+            return stage.send('play', dP);
         }
 
         if (kc !== 13) { return; }
@@ -63,7 +63,7 @@
         lineEl.value = '';
         lineEl.focus();
         console.log('-> %s', msg);
-        stage.send('msg', msg);
+        stage.send('message', msg);
     });
     
     stage.syncSession(onGameStarting);

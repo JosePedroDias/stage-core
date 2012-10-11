@@ -90,7 +90,7 @@ var judge = {
     },
 
     onPlayerExit: function(session) {
-        var ns = this.getReadySessions().length;
+        var ns = this.getNumReadyPlayers();
         var msg = 'player ' + session.name + ' left. players still in: ' + ns;
         console.log(msg);
         this._stage.broadcast('message', msg);
@@ -101,7 +101,7 @@ var judge = {
         console.log(msg);
         this._stage.broadcast('message', msg);
 
-        var sessions = this.getReadySessions();
+        var sessions = this.getReadyPlayers();
         var ns = sessions.length;
 
         if (ns < 2) {
@@ -120,8 +120,9 @@ var judge = {
             console.log(msg);
             this._stage.broadcast('message', msg);
 
-            this._stage.send('setPiece', sessions[0].piece, sessions[0].socket);
-            this._stage.send('setPiece', sessions[1].piece, sessions[1].socket);
+            console.log('BANG');
+            this._stage.send('setPiece', sessions[0].piece, sessions[0]);
+            this._stage.send('setPiece', sessions[1].piece, sessions[1]);
 
             this._state.numPlayers = 2;
 
@@ -136,16 +137,7 @@ var judge = {
 
 
 
-    onPlay: function(pos, socket) {
-        var session = socket._session;
-
-        // validate it is your turn
-        var sessions = this.getReadySessions();
-        if (session !== sessions[ this._state.nextToPlay ]) {
-            console.log('ignoring play out of turn!');
-            return;
-        }
-        
+    onPlay: function(pos, session) {
         /*console.log([
             'got pos ', pos.join(','), ' from player #', this._state.nextToPlay, ' (', session.piece, ').'
         ].join(''));*/
@@ -178,22 +170,15 @@ var judge = {
             pos:    pos
         };
 
-        ++this._state.nextToPlay;
-        if (this._state.nextToPlay >= this._state.numPlayers) {
-            this._state.nextToPlay = 0;
-        }
-
         // update state for other player
-        this._stage.send('play', play, sessions[ this._state.nextToPlay ].socket);
-
-        this._notifyNextTurn();
+        var sessions = this.getReadyPlayers();
+        var otherPlayer = (this._state.nextToPlay + 1) % 2;
+        this._stage.send('play', play, sessions[ otherPlayer ]);
 
         //console.log([session.name, ' play: ', JSON.stringify(o)].join(''));
     },
 
-    onMessage: function(o) {
-        var session = socket._session;
-
+    onMessage: function(o, session) {
         this._stage.broadcast('message', ['<b>', session.name, ' @ ', this.getTime(), ':</b> ', o].join(''));
         //console.log([session.name, ' message: ', JSON.stringify(o)].join(''));
     }

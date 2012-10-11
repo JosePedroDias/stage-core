@@ -11,7 +11,6 @@
     var http    = require('http'),
         fs      = require('fs'),
         express = require('express'),
-        //sio     = require('socket.io');
         eio     = require('engine.io');
 
 
@@ -183,18 +182,20 @@
 
 
 
-        send: function(kind, o, socket) {
+        send: function(kind, o, socketOrSession) {
+            var socket = socketOrSession._socket ? socketOrSession._socket : socketOrSession;
             var data = jsonEnc(kind, o);
-            socket.send(data);
             if (debugSockets) { console.log('SENDING VIA %s MESSAGE: %s', socket.id, data); }
+            socket.send(data);
         },
 
         broadcast: function(kind, o) {
             var data = jsonEnc(kind, o);
-            for (var i = 0, f = this._sockets.length; i < f; ++i) {
+            var i, f = this._sockets.length;
+            if (debugSockets) { console.log('BROADCASTING TO %d SOCKETS MESSAGE: %s', f, data); }
+            for (i = 0; i < f; ++i) {
                 this._sockets[i].send(data);
             }
-            if (debugSockets) { console.log('BROADCASTING TO %d SOCKETS MESSAGE: %s', f, data); }
         },
 
         subscribe: function(kind, cb) {

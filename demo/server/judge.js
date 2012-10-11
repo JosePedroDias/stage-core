@@ -3,15 +3,15 @@
 
 
 var rndInt = function(max, min) {
-	if (min === undefined) { min = 0; }
-	return min + ~~( (max-min) * Math.random() );
+    if (min === undefined) { min = 0; }
+    return min + ~~( (max-min) * Math.random() );
 };
 
 
 // TODO
 var judge = {
 
-	sortFn: undefined,
+    sortFn: undefined,
 
 
 
@@ -28,7 +28,10 @@ var judge = {
     onPlayerUpdate: function(session) {
         //console.log('onPlayerUpdate - ' + session.name);
 
-        this._stage.broadcast('pos', {id:session.name, pos:session.pos, color:session.color});
+        if (session.changed) {
+            this._stage.broadcast('pos', {id:session.name, pos:session.pos, color:session.color});
+            delete session.changed;
+        }
     },
 
     postPlayerUpdates: function() {
@@ -52,37 +55,44 @@ var judge = {
 
     onPlayerExit: function(session) {
         console.log(['-> player ', session.name, ' left'].join(''));
+        this._stage.broadcast('message', '** ' + session.name + ' left. **');
 
-        var ns = this.getNumberOfSessions();
-        console.log('nr sessions: ' + ns);
+        var ns = this.getNumReadyPlayers();
+        console.log('nr players: ' + ns);
+
+        if (ns > 2) { this.stop(); }
+        this._stage.broadcast('message', '** GAME STOPPED **');
     },
 
     onPlayerReady: function(session) {
+        session.changed = true;
         console.log([session.name, ' session set. Player ready!'].join(''));
+        this._stage.broadcast('message', '** ' + session.name + ' got in. **');
 
-        var ns = this.getNumberOfSessions();
-        console.log('nr sessions: ' + ns);
+        var ns = this.getNumReadyPlayers();
+        console.log('nr players: ' + ns);
 
         if (ns > 1) {
             this.start();
+            this._stage.broadcast('message', '** GAME STARTED **');
+        }
+        else {
+            this._stage.broadcast('message', '** WAITING FOR AT LEAST 1 MORE PLAYER... **');
         }
     },
 
 
 
-    onKeys: function(o, session) {
-    	session.pos[0] += o[0] * 20;
-    	session.pos[1] += o[1] * 20;
-        //console.log([session.name, ' keys: ',     JSON.stringify(o)].join(''));
-    },
-
-    onMouse: function(o, session) {
-        //console.log([session.name, ' mouse: ',    JSON.stringify(o)].join(''));
+    onPlay: function(o, session) {
+        session.pos[0] += o[0] * 20;
+        session.pos[1] += o[1] * 20;
+        session.changed = true;
+        //console.log([session.name, ' keys: ', JSON.stringify(o)].join(''));
     },
 
     onMessage: function(o, session) {
-        this._stage.broadcast('msg', ['<span style="color:', session.color, '"><b>', session.name, ' @ ', this.getTime(), ':</b> ', o, '</span>'].join(''));
-        //console.log([session.name, ' message: ',  JSON.stringify(o)].join(''));
+        this._stage.broadcast('message', ['<span style="color:', session.color, '"><b>', session.name, ' @ ', this.getTime(), ':</b> ', o, '</span>'].join(''));
+        //console.log([session.name, ' message: ', JSON.stringify(o)].join(''));
     }
 
 };
