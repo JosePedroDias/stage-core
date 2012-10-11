@@ -11,7 +11,12 @@
     var http    = require('http'),
         fs      = require('fs'),
         express = require('express'),
-        sio     = require('socket.io');
+        //sio     = require('socket.io');
+        eio     = require('engine.io');
+
+
+
+    var debugSockets = false;
 
 
 
@@ -24,8 +29,8 @@
         return value;
     };
 
-    var json2 = function(o) { // TODO skip roundtrip, socket.io option exists?
-        return JSON.parse( JSON.stringify(o, censor, 0) );
+    var jsonEnc = function(kind, o) {
+        return JSON.stringify([kind, o], censor, 0);
     };
 
 
@@ -38,7 +43,7 @@
         if (!cfg) { cfg = {}; }
         if (!('port'     in cfg)) { cfg.port     = 3000; }
         if (!('rootDir'  in cfg)) { cfg.rootDir  = __dirname; }
-        if (!('stageDir' in cfg)) { cfg.stageDir = __dirname; }
+        if (!('stageDir' in cfg)) { cfg.stageDir = __dirname; } // TODO require.resolve('stage-core') - file name
         this._cfg = cfg;
 
         this._init();
@@ -63,7 +68,7 @@
                     this._judge[k] = j[k];
                 }
             }
-            console.log(this._judge);
+            //console.log(this._judge);
 
 
             
@@ -99,13 +104,73 @@
 
 
             // socket.io setup
-            this._io = sio.listen(server);
-            var sockets = [];
+            this._io = eio.attach(server);
+            this._sockets = [];
+            this._socketsHash = {};
+            this._socketSubs = {};  // TODO
 
-            this._io.set('log level', 1);     // reduce logging
+            this._io.on('connection', function(socket) {
+                var sId = socket.id;
 
-            this._io.sockets.on('connection', function(socket) {
-                sockets.push(socket);
+                if (debugSockets) { console.log('SOCKET %s CONNECTED', socket.id); }
+
+                that._sockets.push(socket);
+                that._socketsHash[sId] = socket;
+
+                socket._subsHash = {};
+                socket.subs = function(kind, cb) {
+                    var bucket = this._subsHash[kind];
+                    if (!bucket) {
+                        this._subsHash[kind] = [cb];
+                    }
+                    else {
+                        bucket.push(cb);
+                    }
+                };
+
+                socket.on('message', function(data) {
+                    if (debugSockets) { console.log('RECEIVED FROM SOCKET %s MESSAGE: %s', this.id, data); }
+                    data = JSON.parse(data);
+                    var kind = data[0];
+                    var o    = data[1];
+                    
+                    var unattended = true;
+                    var i, f, bucket = this._subsHash[kind];
+                    if (bucket) {
+                        for (i = 0, f = bucket.length; i < f; ++i) {
+                            bucket[i](o, this); //TODO
+                            unattended = false;
+                        }
+                    }
+
+                    bucket = that._socketSubs[kind];
+                    if (bucket) {
+                        for (i = 0, f = bucket.length; i < f; ++i) {
+                            bucket[i](o, this); //TODO
+                            unattended = false;
+                        }
+                    }
+
+                    if (unattended) {
+                        if (debugSockets) { console.log('WARNING: MESSAGE UNATTENDED.'); }
+                    }
+                });
+
+                socket.on('close', function() {
+                    if (debugSockets) { console.log('SOCKET %s CLOSED', this._id); }
+                    for (var i = 0, f = that._sockets.length; i < f; ++i) {
+                        if (this === that._sockets[i]) {
+                            that._sockets.splice(i, 1);
+                            break;
+                        }
+                    }
+
+                    delete that._socketsHash[sId];
+
+                    that._judge._socketDisconnected(socket);
+                });
+
+                that._judge._socketConnected(socket);
             });
             
 
@@ -119,15 +184,28 @@
 
 
         send: function(kind, o, socket) {
-            socket.emit(kind, json2(o));
+            var data = jsonEnc(kind, o);
+            socket.send(data);
+            if (debugSockets) { console.log('SENDING VIA %s MESSAGE: %s', socket.id, data); }
         },
 
         broadcast: function(kind, o) {
-            this._io.sockets.emit(kind, json2(o));
+            var data = jsonEnc(kind, o);
+            for (var i = 0, f = this._sockets.length; i < f; ++i) {
+                this._sockets[i].send(data);
+            }
+            if (debugSockets) { console.log('BROADCASTING TO %d SOCKETS MESSAGE: %s', f, data); }
         },
 
         subscribe: function(kind, cb) {
-            this._io.sockets.on(kind, cb); // TODO only works on connection?!
+            var bucket = this._socketSubs[kind];
+            if (!bucket) {
+                this._socketSubs[kind] = [cb];
+            }
+            else {
+                bucket.push(cb);
+            }
+            if (debugSockets) { console.log('SUBSCRIBED MESSAGES OF KIND %s', kind); }
         }
         
     };

@@ -60,7 +60,7 @@ var validateTTTMap = function(map) {
 var judge = {
 
     init: function() {
-        console.log('init called.');
+        //console.log('init called.');
 
         DiscreteMap = require(this._stage._cfg.stageDir + '/lib/server/DiscreteMap').DiscreteMap;
         this._state.map = new DiscreteMap(3, 3);
@@ -90,7 +90,7 @@ var judge = {
     },
 
     onPlayerExit: function(session) {
-        var ns = this.getNumberOfSessions();
+        var ns = this.getReadySessions().length;
         var msg = 'player ' + session.name + ' left. players still in: ' + ns;
         console.log(msg);
         this._stage.broadcast('message', msg);
@@ -101,7 +101,8 @@ var judge = {
         console.log(msg);
         this._stage.broadcast('message', msg);
 
-        var ns = this.getNumberOfSessions();
+        var sessions = this.getReadySessions();
+        var ns = sessions.length;
 
         if (ns < 2) {
             msg = 'waiting for players...';
@@ -109,7 +110,6 @@ var judge = {
             this._stage.broadcast('message', msg);
         }
         else if (ns === 2) {
-            var sessions = this.getSessions();
             sessions[0].piece = 'x';
             sessions[1].piece = 'o';
             msg = [
@@ -136,23 +136,25 @@ var judge = {
 
 
 
-    onPlay: function(pos, session) {
+    onPlay: function(pos, socket) {
+        var session = socket._session;
+
         // validate it is your turn
-        var sessions = this.getSessions();
+        var sessions = this.getReadySessions();
         if (session !== sessions[ this._state.nextToPlay ]) {
             console.log('ignoring play out of turn!');
             return;
         }
         
-        console.log([
+        /*console.log([
             'got pos ', pos.join(','), ' from player #', this._state.nextToPlay, ' (', session.piece, ').'
-        ].join(''));
+        ].join(''));*/
 
         this._state.map.setCell(pos[0], pos[1], session.piece);
-        console.log( this._state.map.toString(true) );
+        //console.log( this._state.map.toString(true) );
 
         var val = validateTTTMap(this._state.map);
-        console.log(val);
+        //console.log(val);
 
         var msg = '';
         if (val.whoWon) {
@@ -189,7 +191,9 @@ var judge = {
         //console.log([session.name, ' play: ', JSON.stringify(o)].join(''));
     },
 
-    onMessage: function(o, session) {
+    onMessage: function(o) {
+        var session = socket._session;
+
         this._stage.broadcast('message', ['<b>', session.name, ' @ ', this.getTime(), ':</b> ', o].join(''));
         //console.log([session.name, ' message: ', JSON.stringify(o)].join(''));
     }
