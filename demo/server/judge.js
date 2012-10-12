@@ -8,14 +8,16 @@ var rndInt = function(max, min) {
 };
 
 
-// TODO
+
 var judge = {
 
     sortFn: undefined,
 
 
 
-    init: function() {
+    init: function(onStart) {
+        if (onStart) { return; }
+
         console.log('init called.');
     },
 

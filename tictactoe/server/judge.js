@@ -59,7 +59,9 @@ var validateTTTMap = function(map) {
 
 var judge = {
 
-    init: function() {
+    init: function(onStart) {
+        if (onStart) { return; }
+        
         //console.log('init called.');
 
         DiscreteMap = require(this._stage._cfg.stageDir + '/lib/server/DiscreteMap').DiscreteMap;
