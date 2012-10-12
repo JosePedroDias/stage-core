@@ -2,6 +2,7 @@ var st = require('./stage-core');
 
 new st({
     port:     9000,
-    rootDir:  __dirname + '/demo',
-    fps:      10
+    rootDir:  __dirname + '/bots',
+    fps:      30
 });
+;

@@ -1,0 +1,20 @@
+body {
+    font-family:        sans-serif;
+    background-color:   #444;
+}
+
+canvas {
+    border:             1px solid #AAA;
+    position:           fixed;
+    left:               50%;
+    top:                50%;
+}
+
+.nnInterp {
+    /* uses nearest-neighbour interpolation */
+    image-rendering: optimizeSpeed;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: optimize-contrast;
+    -ms-interpolation-mode: nearest-neighbor;
+}

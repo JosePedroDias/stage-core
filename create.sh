@@ -23,7 +23,7 @@ mkdir $game
  
 #SERVER
 mkdir $game/server
-cp games/.template/server/judge.js $game/server/judge.js
+cp .template/server/judge.js $game/server/judge.js
 
 #CLIENT
 mkdir $game/client
@@ -41,4 +41,4 @@ new st({
     rootDir:  __dirname + '/$game',
     fps:      $fps
 });
-;" > $game/run_$game.js
+;" > run_$game.js
