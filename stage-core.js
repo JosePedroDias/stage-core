@@ -34,11 +34,8 @@
 
 
 
-    var stageCore = function(appName, cfg) {
+    var stageCore = function(cfg) {
         // store configuration
-        if (!appName) { throw new TypeError('1st argument appName is a required string!'); }
-        this._appName = appName;
-
         if (!cfg) { cfg = {}; }
         if (!('port'     in cfg)) { cfg.port     = 3000; }
         if (!('rootDir'  in cfg)) { cfg.rootDir  = __dirname; }

@@ -1,7 +1,6 @@
 var st = require('./stage-core');
 
-
-new st('demo', {
+new st({
     port:     9000,
     rootDir:  __dirname + '/demo',
     fps:      10
