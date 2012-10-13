@@ -1,9 +1,9 @@
 body {
     font-family:        sans-serif;
     background-color:   #DDD;
+    overflow:           hidden;
     margin:             0;
     padding:            0;
-    overflow:           hidden;
 }
 
 @font-face {

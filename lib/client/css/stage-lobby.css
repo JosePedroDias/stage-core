@@ -1,0 +1,42 @@
+#lobby {
+    width:              600px;
+    height:             500px;
+    background-color:   rgba(0, 0, 0, 0.75);
+    border-radius:      6px;
+    color:              #DDD;
+    position:           absolute;
+    left:               50%;
+    top:                50%;
+    margin-left:        -300px;
+    margin-top:         -250px;
+}
+
+#lobby label {
+    font-weight: bold;
+    padding-left:       5px;
+}
+
+#lobby input {
+    margin-left:        5px;
+    width:              250px;
+}
+
+#lobby textarea {
+    margin-left:        5px;
+    width:              586px;
+    height:             336px;
+    overflow:           auto;
+    font-family:        monospace;
+    border:             0;
+}
+
+#lobby button {
+    margin-left:        50px;
+    width:              100px;
+    color:              #FFF;
+    background-color:   #484;
+    border:             0;
+    border-radius:      6px;
+    font-weight:        bold;
+    font-size:          14px;
+}
