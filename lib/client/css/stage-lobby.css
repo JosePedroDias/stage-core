@@ -1,6 +1,6 @@
 #lobby {
     width:              600px;
-    height:             500px;
+    height:             340px;
     background-color:   rgba(0, 0, 0, 0.75);
     border-radius:      6px;
     color:              #DDD;
@@ -8,12 +8,17 @@
     left:               50%;
     top:                50%;
     margin-left:        -300px;
-    margin-top:         -250px;
+    margin-top:         -170px;
 }
 
 #lobby label {
     font-weight: bold;
     padding-left:       5px;
+}
+
+#lobby input,
+#lobby textarea {
+    outline:            none;
 }
 
 #lobby input {
@@ -24,19 +29,21 @@
 #lobby textarea {
     margin-left:        5px;
     width:              586px;
-    height:             336px;
+    height:             200px;
     overflow:           auto;
     font-family:        monospace;
     border:             0;
 }
 
 #lobby button {
-    margin-left:        50px;
-    width:              100px;
+    cursor:             pointer;
+    margin-left:        225px;
+    width:              150px;
     color:              #FFF;
     background-color:   #484;
     border:             0;
     border-radius:      6px;
     font-weight:        bold;
     font-size:          14px;
+    outline:            none;
 }

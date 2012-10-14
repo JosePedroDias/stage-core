@@ -11,6 +11,7 @@
 
 
     var onGameStarting = function() {
+        scr.onFrame();
         stage.subscribe('message', function(msg) {
         });
     };
@@ -21,7 +22,11 @@
             {name:'code', kind:'textarea', value:session.code}
         ], onGameStarting);
     };
-    
+
     stage.init(onSessionAvailable);
+
+    stage.console.hide();
+
+    stage.roster.show();
 
 })();

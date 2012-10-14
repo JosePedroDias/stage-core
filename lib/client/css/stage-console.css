@@ -1,0 +1,68 @@
+#console {
+    position:           fixed;
+    bottom:             0;
+    left:               0;
+    right:              0;
+    height:             100px;
+    background-color:   rgba(0, 0, 0, 0.75);
+    color:              #FFF;
+
+    -webkit-transition: bottom 1s;
+       -moz-transition: bottom 1s;
+        -ms-transition: bottom 1s;
+         -o-transition: bottom 1s;
+            transition: bottom 1s;
+}
+
+#console .title {
+    cursor:             pointer;
+    height:             20px;
+    position:           absolute;
+    top:                -20px;
+    color:              #FFF;
+    font-family:        monospace;
+    font-size:          14px;
+    background-color:   rgba(0, 0, 0, 0.75);
+    padding:            0 6px;
+    border-radius:      6px 6px 0 0;
+}
+
+#console .lines {
+    bottom:             20px;
+    height:             80px;
+    overflow:           hidden;
+    overflow-y:         visible;
+}
+
+#console .lines p {
+    margin:             0;
+    padding:            0 20px;
+}
+
+#console .prompt {
+    bottom:             0;
+}
+
+#console input {
+    bottom:             0;
+    height:             20px;
+    background-color:   transparent;
+    border:             0;
+    padding:            0 20px;
+    outline:            none;
+}
+
+#console .lines,
+#console .prompt,
+#console input {
+    position:           absolute;
+    left:               0;
+    color:              #FFF;
+    font-family:        monospace;
+    font-size:          14px;
+}
+
+#console .lines,
+#console input {
+    width:              100%;
+}
