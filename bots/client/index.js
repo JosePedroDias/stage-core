@@ -11,6 +11,10 @@
 
 
     var onGameStarting = function() {
+        stage.subscribe('update', function(o) {
+            stage._o = o;
+        });
+
         scr.onFrame();
     };
 

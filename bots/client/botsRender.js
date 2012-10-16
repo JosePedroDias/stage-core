@@ -20,14 +20,27 @@
     scr.update = function() {
         //var dt = this.dt / 1000;
         var dt = 1/30;
-        //console.log(dt);
-        var sh;
-        for (var i = 0, f = this.shapes.length; i < f; ++i) {
+
+        if (!window.stage._o) { return; }
+
+        var sh, s;
+        for (var i = 0, f = window.stage._o.length; i < f; ++i) {
             sh = this.shapes[i];
-            sh.pos = [
-                sh.pos[0] + sh.speed * dt * Math.cos(sh.angle * DEG2RAD),
-                sh.pos[1] + sh.speed * dt * Math.sin(sh.angle * DEG2RAD)
-            ];
+            s = window.stage._o[i];
+
+            if (!sh) {
+                sh = {
+                    draw:   botDraw,
+                    dims:   [40, 40],
+                    color:  '#F77',
+                    energy: 1
+                };
+                this.shapes.push(sh);
+            }
+
+            sh.pos   = s.pos;
+            sh.angle = s.angle;
+            sh.name  = s.name;
         }
     };
 
@@ -70,30 +83,6 @@
             ctx.globalAlpha = 1;
         ctx.restore();
     };
-
-    scr.shapes.push({
-        draw:   botDraw,
-        dims:   [40, 40],
-
-        pos:    [80, 50],
-        color:  '#F77',
-        angle:  90,
-        speed:  5,
-        energy: 1,
-        name:   'drone'
-    });
-
-    scr.shapes.push({
-        draw:   botDraw,
-        dims:   [40, 40],
-
-        pos:    [180, 80],
-        color:  '#7F7',
-        angle:  45,
-        speed:  20,
-        energy: 0.75,
-        name:   'mayhem'
-    });
 
     document.body.appendChild(scr.el);
 
