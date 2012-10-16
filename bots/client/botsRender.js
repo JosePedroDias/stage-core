@@ -32,15 +32,16 @@
                 sh = {
                     draw:   botDraw,
                     dims:   [40, 40],
-                    color:  '#F77',
-                    energy: 1
+                    energy: 1,
+
+                    color:  s.color,
+                    name:   s.name
                 };
                 this.shapes.push(sh);
             }
 
             sh.pos   = s.pos;
             sh.angle = s.angle;
-            sh.name  = s.name;
         }
     };
 

@@ -40,6 +40,7 @@ var judge = {
     generateDefaultSession: function() {
         return {
             name: 'unnamed_bot',
+            color: ['rgb(', rndInt(256), ', ', rndInt(256), ', ', rndInt(256), ')'].join(''),
             code: [
                 '// available inputs/perceptions:   per',
                 '// available output/action:        act, default is noop',
@@ -77,6 +78,8 @@ var judge = {
             s = sessions[i];
             o.push({
                 name:   s.name,
+                color:  s.color,
+                
                 pos:    s.pos,
                 angle:  s.angle
             });
@@ -112,12 +115,15 @@ var judge = {
     onPlay: function(o, session) {
         //console.log([session.name, ' play: ', JSON.stringify(o)].join(''));
 
-        if      (o === 'forward') {  session.dV =  10; }
-        else if (o === 'backward') { session.dV = -10; }
+        var V = 20;
+        var A = 3;
+
+        if      (o === 'forward') {  session.dV =  V; }
+        else if (o === 'backward') { session.dV = -V; }
         else {                       session.dV =  0; }
 
-        if      (o === 'left') {  session.dA = -2; }
-        else if (o === 'right') { session.dA =  2; }
+        if      (o === 'left') {  session.dA = -A; }
+        else if (o === 'right') { session.dA =  A; }
         else {                    session.dA =  0; }
     },
 

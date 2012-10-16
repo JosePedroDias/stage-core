@@ -20,8 +20,9 @@
 
     var onSessionAvailable = function(session, cfg) {
         stage.lobby.generateForm([
-            {name:'name', kind:'text',     value:session.name},
-            {name:'code', kind:'textarea', value:session.code}
+            {name:'name',  kind:'text',     value:session.name},
+            {name:'color', kind:'text',     value:session.color},
+            {name:'code',  kind:'textarea', value:session.code}
         ], onGameStarting);
     };
 
