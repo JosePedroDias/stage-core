@@ -32,4 +32,18 @@
 
     stage.roster.show();
 
+    document.addEventListener('keydown', function(ev) {
+        var kc = ev.keyCode;
+
+        var dir;
+        if      (kc === 37) { dir = 'left';     }
+        else if (kc === 39) { dir = 'right';    }
+        else if (kc === 38) { dir = 'forward';  }
+        else if (kc === 40) { dir = 'backward'; }
+        else { return; }
+        ev.preventDefault();
+
+        return stage.send('play', dir);
+    });
+
 })();

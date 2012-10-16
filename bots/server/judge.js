@@ -53,6 +53,13 @@ var judge = {
         };
     },
 
+    rosterView: function(o) {
+            return {
+                name:   ['<span style="color:', o.color, '">', o.name, '</span>', (o.isBot ? ' (BOT)' : ' (HUMAN)')].join(''),
+                id:     o.id
+            };
+        },
+
 
 
     prePlayerUpdates: function() {
@@ -79,7 +86,7 @@ var judge = {
             o.push({
                 name:   s.name,
                 color:  s.color,
-                
+
                 pos:    s.pos,
                 angle:  s.angle
             });
