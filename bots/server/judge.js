@@ -6,23 +6,38 @@
 var judge = {
 
     init: function(onStart) {
-        if (onStart) { return; }
+        //if (onStart) { return; }
 
         console.log('init called.');
+    },
+
+    generateDefaultSession: function() {
+        return {
+            name: 'unnamed_bot',
+            code: [
+                '// available inputs/perceptions:   per',
+                '// available output/action:        act, default is noop',
+                '// internal state:                 stt',
+                '',
+                'if (isNaN(stt.x)) { stt.x = 0; }',
+                'console.log(++stt.x);',
+                'act="left";'
+            ].join('\n')
+        };
     },
 
 
 
     prePlayerUpdates: function() {
-        console.log('prePlayerUpdates');
+        //console.log('prePlayerUpdates');
     },
 
     onPlayerUpdate: function(session) {
-        console.log('onPlayerUpdate - ' + session.name);
+        //console.log('onPlayerUpdate - ' + session.name);
     },
 
     postPlayerUpdates: function() {
-        console.log('postPlayerUpdates');
+        //console.log('postPlayerUpdates');
     },
 
 
@@ -33,10 +48,18 @@ var judge = {
 
     onPlayerExit: function(session) {
         console.log(['player ', session.name, ' left'].join(''));
+
+        if (this.getNumReadyPlayers() === 0) {
+            this.stop();
+        }
     },
 
     onPlayerReady: function(session) {
         console.log(['player ', session.name, ' ready'].join(''));
+
+        if (this.getNumReadyPlayers() > 0) {
+            this.start();
+        }
     },
 
 
@@ -46,7 +69,16 @@ var judge = {
     },
 
     onMessage: function(o, session) {
-        console.log([session.name, ' message: ', JSON.stringify(o)].join(''));
+        //console.log([session.name, ' message: ', JSON.stringify(o)].join(''));
+
+        this._stage.broadcast('message', session.name + ': ' + o);
+    },
+
+
+
+    updateBotPerceptions: function(perceptions, session, state) {
+        perceptions.position = session.position;
+        perceptions.rotation = session.rotation;
     }
 
 };

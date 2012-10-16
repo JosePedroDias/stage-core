@@ -54,3 +54,9 @@
 	margin:				0;
 	margin-left:		20px;
 }
+
+#roster .lines blockquote div:hover {
+    color:              #000;
+    background-color:   #FFF;
+    cursor:             pointer;
+}

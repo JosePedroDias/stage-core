@@ -12,8 +12,6 @@
 
     var onGameStarting = function() {
         scr.onFrame();
-        stage.subscribe('message', function(msg) {
-        });
     };
 
     var onSessionAvailable = function(session, cfg) {
