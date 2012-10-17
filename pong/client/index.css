@@ -1,13 +1,8 @@
 body {
     font-family:        sans-serif;
     background-color:   #444;
-}
-
-canvas {
-    border:             1px solid #AAA;
-    position:           fixed;
-    left:               50%;
-    top:                50%;
+    padding:            0;
+    margin:             0;
 }
 
 .nnInterp {
