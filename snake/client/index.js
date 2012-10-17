@@ -57,6 +57,9 @@
         return stage.send('play', dir);
     });
     
-    stage.syncSession(onGameStarting);
+    stage.init(function(session, cfg) {
+        stage.logIn(session, onGameStarting);
+    });
+    //stage.syncSession(onGameStarting);
 
 })();

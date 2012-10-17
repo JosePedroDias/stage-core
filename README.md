@@ -16,10 +16,11 @@ One has the stage variable exposed on the client-side. This provides the followi
 
 `{Object} ._session` - the retrieved player profile
 
+`init({Function({Object} session, {Object} cfg)} onSessionAvailableCb)` - sets up connectivity with the server and returns a prior session or a default one.
 
-`syncSession({Function} cb)` - by invoking this method you provide a callback which will be called once to profile synchronization takes place. only after this can the game start.
+`logIn({Object} session, {Function()}onGameStartedCb)` - call this to send the updated session info. the callback with be called once to game is ready.
 
-`send({String} kind, {Object}o)` - this method offers a way for the client to send a message of the given kind to the server. Common kinds are 'play' to submit a game-changing action and 'message' to send a message.
+`send({String} kind, {any} o)` - this method offers a way for the client to send a message of the given kind to the server. Common kinds are 'play' to submit a game-changing action and 'message' to send a message.
 
 `subscribe({String} kind, {Function} cb)` - by providing stage with a cb, you indicate what to do when a message of the given kind is sent from the server. 
 
@@ -38,10 +39,9 @@ One has the stage variable exposed on the client-side. This provides the followi
 
 # JUDGE API (SERVER)
 
-#
+`this._state.frameNr`
 
-this._state.frameNr
-this._state.
+
 
 ## USABLE METHODS
 
@@ -62,11 +62,17 @@ For turn-based games it means that the server will notify each player to send pl
 
 `stop()` - once called, stops the game loop.
 
+`getTime()` - for convenience
+
 
 
 ## REWRITABLE METHODS
 
 `sortFn` - if provided, this function offers a way for the judge to empose an order to the players. This is probably most useful in turn-based games.
+
+`{Object} rosterView({Object} o)` - 
+
+`{Object} generateDefaultSession()` - 
 
 
 
@@ -78,7 +84,7 @@ For turn-based games it means that the server will notify each player to send pl
 
 
 
-`init()` - this method is called prior to game start, so the server can prepare its state.
+`init({Boolean} onStart)` - this method is called prior to game start, so the server can prepare its state.
 
 
 
@@ -93,6 +99,11 @@ For turn-based games it means that the server will notify each player to send pl
 `onMessage({any} message)` - this method is invoked when a client sends a message. It's up to the server to decide it's visibility and meaning (ex: could just broadcast it, send it to its teammates, use it as a means to change something else)
 
 `onPlay({any} play)` - this method is invoked when a client has data to provide that is expected to change the course of the game. This can be as low-level as a set of game key states/mouse input, etc, commands such as positions, actions etc or any other combination. Notice that its up to the server to validate if the frequency and values given in such messages are valid, i.e., on popular games one may need to through limiting values and throttling conditions on this method so clients can't cheat.
+
+
+## REWRITABLE METHODS - BOTS RELATED
+
+`updatePerceptions({Object} perceptions, {Object} session, {Object} state)`
 
 
 
