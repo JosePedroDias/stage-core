@@ -6,3 +6,4 @@ It exposes an **HTTP server** for serving a **simple-page games** with **websock
 Read more details on the
 [introduction](https://github.com/JosePedroDias/stage-core/blob/master/doc/intro.md) and
 [API](https://github.com/JosePedroDias/stage-core/blob/master/doc/api.md) pages.
+There's also a presentation you can [take a look at](http://josepedrodias.github.com/prezijs/stage-core-en.html).
