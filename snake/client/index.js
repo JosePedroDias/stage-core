@@ -39,7 +39,7 @@
         });
 
         stage.subscribe('alert', function(o) {
-            alert(o);
+            console.log(o);
         });
     };
 
