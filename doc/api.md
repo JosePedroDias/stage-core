@@ -1,7 +1,17 @@
 # Table of Contents
 
-* auto-gen TOC:
-{:toc}
+* [Configuration Options (server)](#configuration-options-server)
+* [Stage API (server)](#stage-api-server)
+* [Judge API (server)](#judge-api-server)
+    * [Usable Methods](#usable-methods)
+    * [Rewritable Methods](#rewritable-methods)
+    * [Rewritable Methods (bots related)](#rewritable-methods-bots-related)
+* [Stage API (client)](#stage-api-client)
+* [Additional libraries for optional client usage](#additional-libraries-for-optional-client-usage)
+    * [stage.lobby](#stagelobby)
+    * [stage.console](#stageconsole)
+    * [stage.roster](#stageroster)
+    * [DiscreteMap](#discretemap)
 
 
 
@@ -53,7 +63,7 @@ For turn-based games it means that the server will notify each player to send pl
 
 
 
-## Rewrittable Methods
+## Rewritable Methods
 
 `sortFn` - if provided, this function offers a way for the judge to empose an order to the players. This is probably most useful in turn-based games.
 
@@ -87,6 +97,7 @@ If onStart is false, it means it is being called prior to any player connection.
 `onMessage({any} message)` - this method is invoked when a client sends a message. It's up to the server to decide it's visibility and meaning (ex: could just broadcast it, send it to its teammates, use it as a means to change something else). by default broadcasts the message to every other player.
 
 `onPlay({any} play)` - this method is invoked when a client has data to provide that is expected to change the course of the game. This can be as low-level as a set of game key states/mouse input, etc, commands such as positions, actions etc or any other combination. Notice that its up to the server to validate if the frequency and values given in such messages are valid, i.e., on popular games one may need to validate the given values and/or set throttling conditions on this method so clients can't cheat.
+
 
 
 ## Rewritable Methods (bots related)
