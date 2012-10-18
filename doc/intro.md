@@ -1,7 +1,7 @@
 ## What is stage-core?
 
 Stage provides a **simple way of creating web-based multiplayer games**.
-It exposes an ***HTTP server** for serving a **simple-page games** with **websocket communication** and a **built-in state machine** to take care of the most common features of both **real-time** and **turn-based games**, for both **human players** and **bots**.
+It exposes an **HTTP server** for serving a **simple-page games** with **websocket communication** and a **built-in state machine** to take care of the most common features of both **real-time** and **turn-based games**, for both **human players** and **bots**.
 
 Stage does not impose any library for input or rendering. It offers some merely as suggestions of implementation.
 Given the game configuration, where you set up the kind of game (real-time or turn-based) and other technical aspects (i.e. turn fps/bot fps), you get a set of methods, some of which you can override to set your game logic in these key stages.
