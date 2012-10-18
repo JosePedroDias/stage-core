@@ -1,4 +1,11 @@
-# CONFIGURATION OPTIONS (SERVER)
+# Table of Contents
+
+* auto-gen TOC:
+{:toc}
+
+
+
+# Configuration Options (server)
 
 by instancing a new stage-core, you can provide an object with options.
 
@@ -11,7 +18,7 @@ by instancing a new stage-core, you can provide an object with options.
 
 
 
-# STAGE API (SERVER)
+# Stage API (server)
 
 `send({String} kind, {Object} o, {Object} session)` - sends the message o of kind kind to the player whose session is session
 
@@ -21,9 +28,9 @@ by instancing a new stage-core, you can provide an object with options.
         
 
 
-# JUDGE API (SERVER)
+# Judge API (server)
 
-## USABLE METHODS
+## Usable Methods
 
 `{Number} getNumReadyPlayers()` - returns the number of players ready/playing
 
@@ -46,7 +53,7 @@ For turn-based games it means that the server will notify each player to send pl
 
 
 
-## REWRITABLE METHODS
+## Rewrittable Methods
 
 `sortFn` - if provided, this function offers a way for the judge to empose an order to the players. This is probably most useful in turn-based games.
 
@@ -82,7 +89,7 @@ If onStart is false, it means it is being called prior to any player connection.
 `onPlay({any} play)` - this method is invoked when a client has data to provide that is expected to change the course of the game. This can be as low-level as a set of game key states/mouse input, etc, commands such as positions, actions etc or any other combination. Notice that its up to the server to validate if the frequency and values given in such messages are valid, i.e., on popular games one may need to validate the given values and/or set throttling conditions on this method so clients can't cheat.
 
 
-## REWRITABLE METHODS - BOTS RELATED
+## Rewritable Methods (bots related)
 
 For a player to be considered a bot, the `code` key must be present.
 If so, `isBot` is set to true and bots get their code run in a context where only `per`, `stt` and `act` are defined (perceptions, internal state and action). In order for the bot to get a meaningful view of the world, you should override judge's `updatePerceptions()` method.
@@ -90,7 +97,7 @@ If so, `isBot` is set to true and bots get their code run in a context where onl
 `updatePerceptions({Object} perceptions, {Object} session, {Object} state)`
 
 
-# STAGE API (CLIENT)
+# Stage API (client)
 
 One has the stage variable exposed on the client-side. This provides the following properties and methods:
 
@@ -108,7 +115,7 @@ One has the stage variable exposed on the client-side. This provides the followi
 
 
 
-# CLIENT ADDITIONAL LIBS (OPTIONAL)
+# Additional libraries for optional client usage
 
 ## stage.lobby
 
