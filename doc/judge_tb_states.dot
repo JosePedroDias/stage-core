@@ -1,0 +1,35 @@
+# dot a.dot -Tjpg > a.jpg
+
+digraph G {
+    node            [fontname="Bitstream Vera Sans", fontsize=10, shape=plaintext]
+    edge            [fontname="Bitstream Vera Sans", fontsize=10]
+    
+    whileStopped    [label="stopped state", fontsize=8, shape=box, style=dashed, color=grey, fontcolor=red]
+
+    subgraph cluster_onEveryFrame {
+        label="running state"
+        fontsize=8
+        shape=box
+        style=dashed
+        color=grey
+        fontcolor=red
+
+        subgraph cluster_forEveryPlayer {
+            label="for every player"
+            fontsize=8
+            shape=box
+            style=dashed
+            color=grey
+            fontcolor=red
+
+            judge  -> player [label="yourTurn", fontcolor=blue, fontsize=8] 
+            player -> judge  [label="play",     fontcolor=blue, fontsize=8]
+
+            judge  [label="judge"]
+            player [label="player"]
+        }
+    }
+
+    whileStopped         -> judge [label="start()", color=grey]
+    judge -> whileStopped         [label="stop()",  color=grey]
+}

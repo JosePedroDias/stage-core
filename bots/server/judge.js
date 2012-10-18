@@ -142,9 +142,9 @@ var judge = {
 
 
 
-    updateBotPerceptions: function(perceptions, session, state) {
-        perceptions.position = session.position;
-        perceptions.rotation = session.rotation;
+    updatePerceptions: function(perceptions, session, state) {
+        perceptions.pos   = session.pos;
+        perceptions.angle = session.angle;
     }
 
 };

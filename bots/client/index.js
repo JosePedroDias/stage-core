@@ -33,6 +33,9 @@
     stage.roster.show();
 
     document.addEventListener('keydown', function(ev) {
+        var discardEls = ['input', 'textarea', 'button'];
+        if (discardEls.indexOf( ev.target.nodeName.toLowerCase() ) !== -1) { return; }
+
         var kc = ev.keyCode;
 
         var dir;
