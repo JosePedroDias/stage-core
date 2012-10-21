@@ -107,6 +107,9 @@ var judge = {
         if (this.getNumReadyPlayers() === 0) {
             this.stop();
         }
+        else {
+            this._stage.broadcast('left', session.name);
+        }
     },
 
     onPlayerReady: function(session) {

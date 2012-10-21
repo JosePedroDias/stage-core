@@ -15,6 +15,15 @@
             stage._o = o;
         });
 
+        stage.subscribe('left', function(name) {
+            for (var i = 0, f = scr.shapes.length; i < f; ++i) {
+                if (scr.shapes[i].name === name) {
+                    console.log(scr.shapes[i]);
+                    scr.shapes.splice(i, 1);
+                }
+            }
+        });
+
         scr.onFrame();
     };
 
@@ -27,9 +36,7 @@
     };
 
     stage.init(onSessionAvailable);
-
     stage.console.hide();
-
     stage.roster.show();
 
     document.addEventListener('keydown', function(ev) {

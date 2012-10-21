@@ -122,7 +122,6 @@ var judge = {
             console.log(msg);
             this._stage.broadcast('message', msg);
 
-            console.log('BANG');
             this._stage.send('setPiece', sessions[0].piece, sessions[0]);
             this._stage.send('setPiece', sessions[1].piece, sessions[1]);
 

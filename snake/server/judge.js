@@ -25,6 +25,39 @@ var dirNames = Object.keys(dirVecs);
 
 var judge = {
 
+    _createSnake: function(session) {
+        // randomize a position on the map
+        var mapDims = this._stage._cfg.mapDims;
+        var p = [
+            rndInt(mapDims[0]),
+            rndInt(mapDims[1])
+        ];
+
+        // randomize a direction and get its deltaPos
+        session.direction = dirNames[ rndInt(4) ];
+        var d = dirVecs[ session.direction ];
+
+        // fill in positions and send pixels
+        session.positions = [];
+        for (var i = 0; i < this._stage._cfg.startLength; ++i) {
+            session.positions.push(p);
+            this._state.map.setCell(p[0], p[1], session.id);
+            this._stage.broadcast('setPixel', {pos:p, color:session.color});
+            p = [p[0] + d[0], p[1] + d[1]];
+            p = this._state.map.wrapPosition(p[0], p[1]);    // wrap it
+        }
+    },
+
+    _destroySnake: function(session) {
+        var p;
+        for (var i = 0, f = session.positions.length; i < f; ++i) {
+            p = session.positions[i];
+            this._state.map.setCell(p[0], p[1], 0);
+            this._stage.broadcast('setPixel', {pos:p, color:'#FFFFFF'});
+        }
+        session.positions = [];
+    },
+
     init: function(onStart) {
         if (onStart) { return; }
 
@@ -35,6 +68,13 @@ var judge = {
         DiscreteMap = require(this._stage._cfg.stageDir + '/lib/server/DiscreteMap').DiscreteMap;
         this._state.map = new DiscreteMap(mapDims[0], mapDims[1], undefined, true);
         this._state.map.fill(0);
+    },
+
+    generateDefaultSession: function() {
+        return {
+            name: 'unnamed',
+            color: ['rgb(', rndInt(256), ', ', rndInt(256), ', ', rndInt(256), ')'].join('')
+        };
     },
 
 
@@ -86,10 +126,21 @@ var judge = {
         var data = map.getCell(p2[0], p2[1]);   // get current cell
 
         if (data !== 0 && data !== 'fruit') {   // cell occuppied -> game over
-            console.log(session.name, 'game over');
+            /*console.log(session.name, 'game over');
             this.stop();
             this._stage.broadcast('alert', 'GAME OVER:\n' + session.name + ' lost!');
-            return;
+            return;*/
+
+            this._destroySnake(session);
+            session.isReady = false;
+
+            setTimeout(
+                function(session) {
+                    this._createSnake(session);
+                    session.isReady = true;
+                }.bind(this, session),
+                2000
+            );
         }
         else {
             var p0;
@@ -118,44 +169,20 @@ var judge = {
 
     onPlayerEnter: function(session) {
         console.log(['player ', session.name, ' entered'].join(''));
-
-        session.color = ['rgb(', rndInt(255), ', ', rndInt(255), ', ', rndInt(255), ')'].join('');
     },
 
     onPlayerExit: function(session) {
         console.log(['player ', session.name, ' left'].join(''));
 
-        var p;
-        for (var i = 0, f = session.positions.length; i < f; ++i) {
-            p = session.positions[i];
-            this._state.map.setCell(p[0], p[1], 0);
-            this._stage.broadcast('setPixel', {pos:p, color:'#FFFFFF'});
-        }
+        this._destroySnake(session);
     },
 
     onPlayerReady: function(session) {
         console.log(['player ', session.name, ' ready'].join(''));
 
-        // randomize a position on the map
-        var mapDims = this._stage._cfg.mapDims;
-        var p = [
-            rndInt(mapDims[0]),
-            rndInt(mapDims[1])
-        ];
+        session.points = 0;
 
-        // randomize a direction and get its deltaPos
-        session.direction = dirNames[ rndInt(4) ];
-        var d = dirVecs[ session.direction ];
-
-        // fill in positions and send pixels
-        session.positions = [];
-        for (var i = 0; i < this._stage._cfg.startLength; ++i) {
-            session.positions.push(p);
-            this._state.map.setCell(p[0], p[1], session.id);
-            this._stage.broadcast('setPixel', {pos:p, color:session.color});
-            p = [p[0] + d[0], p[1] + d[1]];
-            p = this._state.map.wrapPosition(p[0], p[1]);    // wrap it
-        }
+        this._createSnake(session);
 
         if (!this.isRunning()) {   // have at least this player ready, start if not yet running...
             this.start();
@@ -166,12 +193,10 @@ var judge = {
 
     onPlay: function(o, session) {
         session.direction = o;
-
         //console.log([session.name, ' keys: ', JSON.stringify(o)].join(''));
     },
 
     onMessage: function(o, session) {
-        this._stage.broadcast('message', ['<span style="color:', session.color, '"><b>', session.name, ' @ ', this.getTime(), ':</b> ', o, '</span>'].join(''));
         //console.log([session.name, ' message: ', JSON.stringify(o)].join(''));
     }
 

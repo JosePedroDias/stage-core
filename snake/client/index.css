@@ -4,7 +4,6 @@ body {
 }
 
 canvas {
-	border:				1px solid #AAA;
 	position: 			fixed;
 	left:				50%;
 	top:				50%;

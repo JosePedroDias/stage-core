@@ -191,7 +191,9 @@
             var i, f = this._sockets.length;
             if (debugSockets) { console.log('BROADCASTING TO %d SOCKETS MESSAGE: %s', f, data); }
             for (i = 0; i < f; ++i) {
-                this._sockets[i].send(data);
+                if ('send' in this._sockets[i]) {   // TODO
+                    this._sockets[i].send(data);
+                }
             }
         },
 

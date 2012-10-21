@@ -7,23 +7,7 @@
 
     var $ = function(i) { return document.querySelector(i); };
 
-    var ctnEl  = $('#ctn');
-    var lineEl = $('#line');
-
-    var addLine = function(line) {
-        var pEl = document.createElement('p');
-        pEl.innerHTML = line;
-        ctnEl.appendChild(pEl);
-        ctnEl.scrollTop = ctnEl.scrollHeight;
-    };
-
-    var onMessage = function(msg) {
-        console.log('<- %s', msg);
-        addLine(msg);
-    };
-
     var onPos = function(o) {   // id, pos
-        console.log(o);
         var el = $('#' + o.id);
         if (!el) {
             el = document.createElement('div');
@@ -37,38 +21,36 @@
     };
     
     var onGameStarting = function() {
-        stage.subscribe('message', onMessage);
+        //stage.subscribe('message', onMessage);
         stage.subscribe('pos', onPos);
-        addLine('starting...');
-        lineEl.focus();
     };
 
-    lineEl.addEventListener('keydown', function(ev) {
+    window.addEventListener('keydown', function(ev) {
+        var els = ['input', 'textarea'];
+        var tgtEl = ev.target;
+        var tgtName = tgtEl.name.toLowerCase();
+        if (els.indexOf(tgtName) !== -1) { return; }
+
         var kc = ev.keyCode;
-
         var dP = [0, 0];
-        if (kc === 37) { dP[0] = -1; }
-        if (kc === 39) { dP[0] =  1; }
-        if (kc === 38) { dP[1] = -1; }
-        if (kc === 40) { dP[1] =  1; }
-
-        if (dP[0] !== 0 || dP[1] !== 0) {
-            console.log('-> ' + dP.join(','));
-            return stage.send('play', dP);
+        if      (kc === 37) { dP[0] = -1; }
+        else if (kc === 39) { dP[0] =  1; }
+        else if (kc === 38) { dP[1] = -1; }
+        else if (kc === 40) { dP[1] =  1; }
+        else {
+            return;
         }
-
-        if (kc !== 13) { return; }
         ev.preventDefault();
-        var msg = lineEl.value;
-        lineEl.value = '';
-        lineEl.focus();
-        console.log('-> %s', msg);
-        stage.send('message', msg);
+        stage.send('play', dP);
     });
     
     stage.init(function(session, cfg) {
-        stage.logIn(session, onGameStarting);
+        stage.lobby.generateForm([
+            {name:'name',  kind:'text', value:session.name},
+            {name:'color', kind:'text', value:session.color}
+        ], onGameStarting);
     });
-    //stage.syncSession(onGameStarting);
+    stage.console.hide();
+    stage.roster.show();
 
 })();

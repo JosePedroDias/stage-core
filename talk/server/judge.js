@@ -23,6 +23,15 @@ var judge = {
 
 
 
+    generateDefaultSession: function() {
+        return {
+            name:  'unnamed',
+            color: ['rgb(', rndInt(256), ', ', rndInt(256), ', ', rndInt(256), ')'].join('')
+        };
+    },
+
+
+
     prePlayerUpdates: function() {
         //console.log('prePlayerUpdates');
     },
