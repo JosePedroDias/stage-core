@@ -8,20 +8,18 @@
 
 
     var PI  = Math.PI,
-        PI2 = 2*PI;
+        PI2 = 2*PI,
+        PIH = PI*0.5;
 
-    var scr = CS.createScreen({
-        scale:      1,
-        resize:     true
-    });
 
-    document.body.appendChild(scr.el);
 
-    window.scr = scr;   // make scr available
+    var dist = function(p1, p2) {
+        var dx = p1[0] - p2[0];
+        var dy = p1[1] - p2[1];
+        return Math.sqrt(dx*dx + dy*dy);
+    };
 
-    var r = 20;
-    var p1 = [40, 50];
-    var p2 = [160, 130];
+
 
     var circleDraw = function(ctx) {
         ctx.strokeStyle = this.color;
@@ -53,23 +51,172 @@
         ctx.fill();
     };
 
+
+
+    var scr = CS.createScreen({
+        scale:      1,
+        resize:     true,
+        handleKeys: true
+        //handleMouse: true
+    });
+    document.body.appendChild(scr.el);
+    window.scr = scr;   // make scr available
+
+
+
+    var fov      = 90;
+    var dAngle   = 2;
+    var viewDist = 300;
+
+
+    // actors
+
     scr.shapes.push({
-        pos:    p1,
-        r:      r,
-        color:  '#F00',
+        pos:    [100, 200],
+        r:      20,
+        angle:  0,
+        color:  '#FF0',
         draw:   circleDraw
     });
 
     scr.shapes.push({
-        pos:    p2,
-        r:      r,
-        color:  '#F00',
+        pos:    [300, 200],
+        r:      20,
+        angle:  180,
+        color:  '#0FF',
+        draw:   circleDraw
+    });
+
+    // obstacles
+
+    scr.shapes.push({
+        pos:    [120, 40],
+        r:      20,
+        color:  '#F0F',
+        draw:   circleDraw
+    });
+
+    scr.shapes.push({
+        pos:    [120, 80],
+        r:      20,
+        color:  '#F0F',
+        draw:   circleDraw
+    });
+
+    scr.shapes.push({
+        pos:    [120, 120],
+        r:      20,
+        color:  '#F0F',
         draw:   circleDraw
     });
 
 
 
-    var rayCast = function(c0, c1, r, i0, di, ii) {
+    var actors = [];
+    actors.push(scr.shapes[0]);
+    actors.push(scr.shapes[1]);
+
+
+
+    var obstacles = [];
+    obstacles.push(scr.shapes[2]);
+    obstacles.push(scr.shapes[3]);
+    obstacles.push(scr.shapes[4]);
+
+
+
+    var upd = function() {
+        var i, f, pair, comb, sh, sh2, ob;
+
+        // update actors
+        for (i = 0, f = actors.length; i < f; ++i) {
+            sh = actors[i];
+            sh.pos[0] += ~~( Math.random() * 3 - 1.5 );
+            sh.pos[1] += ~~( Math.random() * 3 - 1.5 );
+            sh.angle  += ~~( Math.random() * 5 - 2.5 );
+            sh.shapes = [];
+
+            if (i === 0) {
+                if (scr.keys[37]) { sh.pos[0] -= 2; }
+                if (scr.keys[39]) { sh.pos[0] += 2; }
+                if (scr.keys[38]) { sh.pos[1] -= 2; }
+                if (scr.keys[40]) { sh.pos[1] += 2; }
+                if (scr.keys[90]) { sh.angle -= 2; }
+                if (scr.keys[88]) { sh.angle += 2; }
+            }
+        }
+
+
+        // each actor against obstacles
+        comb = CS.comb2D(actors.length, obstacles.length);
+        for (i = 0, f = comb.length; i < f; ++i) {
+            pair = comb[i];
+            sh = actors[    pair[0] ];
+            ob = obstacles[ pair[1] ];
+            testVisibleCollision(sh, ob);
+        }
+
+
+        // actors against other actors
+        comb = CS.comb2(actors.length);
+        for (i = 0, f = comb.length; i < f; ++i) {
+            pair = comb[i];
+            sh  = actors[ pair[0] ];
+            sh2 = actors[ pair[1] ];
+            testVisibleCollision(sh,  sh2);
+            testVisibleCollision(sh2, sh);
+        }
+    };
+
+    scr.update = upd;
+
+
+    var testCollision = function(sh1, sh2) {
+        var d = dist(sh1.pos, sh2.pos);
+        return d < sh1.r + sh2.r;
+    };
+
+    var testVisibleCollision = function(sh1, sh2) {
+        var o = rayCast(sh1.pos, sh2.pos, sh1.r, sh2.r, sh1.angle, fov, dAngle, viewDist);
+
+        var i, f;
+
+        if (true) {
+            // ray lines
+            for (i = 0, f = o.from.length; i < f; ++i) {
+                if (!o.hit[i] && i !== 0 && i !== f - 1) { continue; }
+                sh1.shapes.push({
+                    pos:    o.from[i],
+                    pos2:   o.to[i],
+                    color:  o.hit[i] ? '#FFF' : '#777',
+                    draw:   lineDraw
+                });
+            }
+        }
+        else {
+            // ray area TODO
+            f = o.from.length;
+            var ps = [];
+
+            for (i = 0; i < f; ++i) {
+                ps.push(o.from[i]);
+            }
+
+            for (i = 0; i < f; ++i) {
+                ps.push(o.from[f - i - 1]);
+            }
+
+            sh1.shapes.push({
+                points: ps,
+                color:  '#00F',
+                draw:   polygonDraw
+            });
+        }
+    };
+
+
+
+    var rayCast = function(c0, c1, r0, r1, i0, di, ii, viewR) {
         var fs = [];    // from (Number[])
         var ts = [];    // to   (Number[])
         var vs = [];    // hit? (boolean)
@@ -79,14 +226,17 @@
             var q = [c0[0], c0[1]];
 
             var a = i * Math.PI/180;
+            /*if      (a < -PI) { a += PI2; }
+            else if (a >  PI) { a -= PI2; }*/
+
             var dx = Math.cos(a);
             var dy = Math.sin(a);
-            p[0] += dx * r;
-            p[1] += dy * r;
-            q[0] += dx * (r + 300);
-            q[1] += dy * (r + 300);
+            p[0] += dx * r0;
+            p[1] += dy * r0;
+            q[0] += dx * (r0 + viewR);
+            q[1] += dy * (r0 + viewR);
 
-            var t = rayCircleIntersection(p, q, c1, r);    //L0, L1, C, R
+            var t = rayCircleIntersection(p, q, c1, r1);    //L0, L1, C, R
 
             fs.push(p);
             if (t) {
@@ -105,42 +255,6 @@
             hit:  vs
         };
     };
-
-    (function() {
-        var o = rayCast(p1, p2, r, 45, 90, 2.5);
-        var i, f;
-
-        if (true) {
-            // ray lines
-            for (i = 0, f = o.from.length; i < f; ++i) {
-                scr.shapes.push({
-                    pos:    o.from[i],
-                    pos2:   o.to[i],
-                    color:  o.hit[i] ? '#F00' : '#0F0',
-                    draw:   lineDraw
-                });
-            }
-        }
-        else {
-            // ray area TODO
-            f = o.from.length;
-            var ps = [];
-
-            for (i = 0; i < f; ++i) {
-                ps.push(o.from[i]);
-            }
-
-            for (i = 0; i < f; ++i) {
-                ps.push(o.from[f - i - 1]);
-            }
-
-            scr.shapes.push({
-                points: ps,
-                color:  '#00F',
-                draw:   polygonDraw
-            });
-        }
-    })();
     
     scr.onFrame();
 
