@@ -9,7 +9,9 @@
 
     var PI  = Math.PI,
         PI2 = 2*PI,
-        PIH = PI*0.5;
+        PIH = PI*0.5,
+        RAD2DEG = 180 / Math.PI,
+        DEG2RAD = Math.PI / 180;
 
 
 
@@ -17,6 +19,13 @@
         var dx = p1[0] - p2[0];
         var dy = p1[1] - p2[1];
         return Math.sqrt(dx*dx + dy*dy);
+    };
+
+    var move = function(from, dlt, angle) {
+        return [
+            dlt * Math.cos(angle * DEG2RAD) + from[0],
+            dlt * Math.sin(angle * DEG2RAD) + from[1]
+        ];
     };
 
 
@@ -27,6 +36,23 @@
         ctx.beginPath();
         ctx.arc(this.pos[0], this.pos[1], this.r, 0, PI2);   // ctx.arc(x, y, r, startAng, endAng, isCCW)
         ctx.stroke();
+    };
+
+    var agentDraw = function(ctx) {
+        ctx.strokeStyle = this.color;
+
+        ctx.beginPath();
+            ctx.arc(this.pos[0], this.pos[1], this.r, 0, PI2);   // ctx.arc(x, y, r, startAng, endAng, isCCW)
+        ctx.stroke();
+
+        ctx.save();
+            ctx.translate(this.pos[0], this.pos[1]);
+            ctx.rotate(this.angle * DEG2RAD);
+            ctx.beginPath();
+                ctx.moveTo(0, 0);
+                ctx.lineTo(this.r, 0);
+            ctx.stroke();
+        ctx.restore();
     };
 
     var lineDraw = function(ctx) {
@@ -53,6 +79,24 @@
 
 
 
+    var fire = function() {
+        var sh = {
+            pos:      move(this.pos, this.r+5+1, this.angle),
+            r:        5,
+            color:    '#00F',
+            v:        2,
+            angle:    this.angle,
+            timeLeft: 50,
+            owner:    this,
+            draw:     circleDraw
+        };
+
+        scr.shapes.push(sh);
+        actors.push(sh);
+    };
+
+
+
     var scr = CS.createScreen({
         scale:      1,
         resize:     true,
@@ -72,19 +116,38 @@
     // actors
 
     scr.shapes.push({
+        isAgent: true,
         pos:    [100, 200],
         r:      20,
         angle:  0,
+        v:      0, // linear vel
+        theta:  0, // angular vel
         color:  '#FF0',
-        draw:   circleDraw
+        draw:   agentDraw,
+        fire:   fire
     });
 
     scr.shapes.push({
+        isAgent: true,
         pos:    [300, 200],
         r:      20,
         angle:  180,
+        v:      0,
+        theta:  0,
         color:  '#0FF',
-        draw:   circleDraw
+        draw:   agentDraw,
+        fire:   fire
+    });
+
+    scr.shapes.push({
+        isAgent: true,
+        pos:    [500, 200],
+        r:      20,
+        angle:  180,
+        v:      0,
+        theta:  0,
+        color:  '#F0F',
+        draw:   agentDraw
     });
 
     // obstacles
@@ -92,21 +155,21 @@
     scr.shapes.push({
         pos:    [120, 40],
         r:      20,
-        color:  '#F0F',
+        color:  '#D00',
         draw:   circleDraw
     });
 
     scr.shapes.push({
         pos:    [120, 80],
         r:      20,
-        color:  '#F0F',
+        color:  '#D00',
         draw:   circleDraw
     });
 
     scr.shapes.push({
         pos:    [120, 120],
         r:      20,
-        color:  '#F0F',
+        color:  '#D00',
         draw:   circleDraw
     });
 
@@ -115,15 +178,33 @@
     var actors = [];
     actors.push(scr.shapes[0]);
     actors.push(scr.shapes[1]);
+    actors.push(scr.shapes[2]);
 
 
 
     var obstacles = [];
-    obstacles.push(scr.shapes[2]);
     obstacles.push(scr.shapes[3]);
     obstacles.push(scr.shapes[4]);
+    obstacles.push(scr.shapes[5]);
 
 
+
+    var agentKeys = [
+        {
+            left:   37, // cursors rshift
+            right:  39,
+            up:     38,
+            down:   40,
+            fire:   16
+        },
+        {
+            left:   65, // wasd space
+            right:  68,
+            up:     87,
+            down:   83,
+            fire:   32
+        }
+    ];
 
     var upd = function() {
         var i, f, pair, comb, sh, sh2, ob;
@@ -131,40 +212,73 @@
         // update actors
         for (i = 0, f = actors.length; i < f; ++i) {
             sh = actors[i];
-            sh.pos[0] += ~~( Math.random() * 3 - 1.5 );
-            sh.pos[1] += ~~( Math.random() * 3 - 1.5 );
-            sh.angle  += ~~( Math.random() * 5 - 2.5 );
-            sh.shapes = [];
-
-            if (i === 0) {
-                if (scr.keys[37]) { sh.pos[0] -= 2; }
-                if (scr.keys[39]) { sh.pos[0] += 2; }
-                if (scr.keys[38]) { sh.pos[1] -= 2; }
-                if (scr.keys[40]) { sh.pos[1] += 2; }
-                if (scr.keys[90]) { sh.angle -= 2; }
-                if (scr.keys[88]) { sh.angle += 2; }
+            
+            // update theta and v based on keys/random
+            if (i === 0 || i === 1) {
+                sh.theta = 0;
+                sh.v     = 0;
+                    if (scr.keys[ agentKeys[i].left  ]) { sh.theta = -2; }
+                    if (scr.keys[ agentKeys[i].right ]) { sh.theta =  2; }
+                    if (scr.keys[ agentKeys[i].up    ]) { sh.v     =  4; }
+                    if (scr.keys[ agentKeys[i].down  ]) { sh.v     = -2; }
+                    if (scr.keys[ agentKeys[i].fire  ]) { sh.fire();     }
             }
+            else if (this.isAgent) {
+                sh.theta = Math.random() * 4 - 2;
+                sh.v     = Math.random() * 4 - 2;
+            }
+
+            // update pos and angle based on v, angle and theta
+            if (sh.theta !== 0) {
+                sh.angle += sh.theta;
+            }
+
+            if (sh.v !== 0) {
+                sh.pos = move(sh.pos, sh.v, sh.angle);
+            }
+
+            // setup aux vars
+            sh.shapes = [];
+            sh.rays = {};
         }
 
 
-        // each actor against obstacles
+        // each agent against obstacles
         comb = CS.comb2D(actors.length, obstacles.length);
         for (i = 0, f = comb.length; i < f; ++i) {
             pair = comb[i];
             sh = actors[    pair[0] ];
             ob = obstacles[ pair[1] ];
+            if (!sh.isAgent) { continue; }
             testVisibleCollision(sh, ob);
         }
 
 
-        // actors against other actors
+        // agent against other actors
         comb = CS.comb2(actors.length);
         for (i = 0, f = comb.length; i < f; ++i) {
             pair = comb[i];
             sh  = actors[ pair[0] ];
             sh2 = actors[ pair[1] ];
-            testVisibleCollision(sh,  sh2);
-            testVisibleCollision(sh2, sh);
+
+            if (sh.isAgent) {  testVisibleCollision(sh,  sh2); }
+            if (sh2.isAgent) { testVisibleCollision(sh2, sh);  }
+        }
+
+        // setup rays for agents
+        var k, ray;
+        for (i = 0, f = actors.length; i < f; ++i) {
+            sh = actors[i];
+            if (!sh.isAgent) { continue; }
+            for (k in sh.rays) {
+                ray = sh.rays[k];
+                sh.shapes.push({
+                    pos:    ray.from,
+                    pos2:   ray.to,
+                    color:  ray.against ? sh.color : '#777',
+                    draw:   lineDraw
+                });
+            }
         }
     };
 
@@ -178,56 +292,37 @@
 
     var testVisibleCollision = function(sh1, sh2) {
         var o = rayCast(sh1.pos, sh2.pos, sh1.r, sh2.r, sh1.angle, fov, dAngle, viewDist);
-
-        var i, f;
-
-        if (true) {
-            // ray lines
-            for (i = 0, f = o.from.length; i < f; ++i) {
-                if (!o.hit[i] && i !== 0 && i !== f - 1) { continue; }
-                sh1.shapes.push({
-                    pos:    o.from[i],
-                    pos2:   o.to[i],
-                    color:  o.hit[i] ? '#FFF' : '#777',
-                    draw:   lineDraw
-                });
+        var i, f, ray, prevRay, wasHit;
+        for (i = 0, f = o.from.length; i < f; ++i) {
+            wasHit = o.hit[i];
+            prevRay = sh1.rays[i];
+            ray = {
+                dist:     wasHit ? dist(o.from[i], o.to[i]) : viewDist,
+                against:  wasHit ? sh2 : undefined,
+                from:     o.from[i],
+                to:       o.to[i],
+                angle:    o.as[i]
+            };
+            
+            if (!prevRay || ray.dist < prevRay.dist) {
+                sh1.rays[i] = ray;
             }
-        }
-        else {
-            // ray area TODO
-            f = o.from.length;
-            var ps = [];
-
-            for (i = 0; i < f; ++i) {
-                ps.push(o.from[i]);
-            }
-
-            for (i = 0; i < f; ++i) {
-                ps.push(o.from[f - i - 1]);
-            }
-
-            sh1.shapes.push({
-                points: ps,
-                color:  '#00F',
-                draw:   polygonDraw
-            });
         }
     };
 
 
 
     var rayCast = function(c0, c1, r0, r1, i0, di, ii, viewR) {
-        var fs = [];    // from (Number[])
-        var ts = [];    // to   (Number[])
-        var vs = [];    // hit? (boolean)
+        var as = [],    // angles (Number in radians)
+            fs = [],    // from (Number[])
+            ts = [],    // to   (Number[])
+            vs = [];    // hit? (Boolean)
 
         for (var i = i0 - di/2; i <= i0+di/2; i += ii) {
             var p = [c0[0], c0[1]];
             var q = [c0[0], c0[1]];
 
             var a = i * Math.PI/180;
-            /*if      (a < -PI) { a += PI2; }
-            else if (a >  PI) { a -= PI2; }*/
 
             var dx = Math.cos(a);
             var dy = Math.sin(a);
@@ -239,6 +334,7 @@
             var t = rayCircleIntersection(p, q, c1, r1);    //L0, L1, C, R
 
             fs.push(p);
+            as.push(a);
             if (t) {
                 ts.push(t);
                 vs.push(true);
@@ -250,6 +346,7 @@
         }
 
         return {
+            as:   as,
             from: fs,
             to:   ts,
             hit:  vs
