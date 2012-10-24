@@ -78,17 +78,20 @@
     };
 
 
-
+    var cannonBallNr = 1;
     var fire = function() {
         var sh = {
-            pos:      move(this.pos, this.r+5+1, this.angle),
-            r:        5,
-            color:    '#00F',
-            v:        2,
-            angle:    this.angle,
-            timeLeft: 50,
-            owner:    this,
-            draw:     circleDraw
+            name:         'cannonBall' + cannonBallNr++,
+            isCannonBall: true,
+            pos:         move(this.pos, this.r+5+1, this.angle),
+            r:           5,
+            angle:       this.angle,
+            v:           5,
+            theta:       0,
+            color:       '#00F',
+            draw:        circleDraw,
+            owner:       this,
+            framesToDie: 100
         };
 
         scr.shapes.push(sh);
@@ -116,61 +119,76 @@
     // actors
 
     scr.shapes.push({
-        isAgent: true,
-        pos:    [100, 200],
-        r:      20,
-        angle:  0,
-        v:      0, // linear vel
-        theta:  0, // angular vel
-        color:  '#FF0',
-        draw:   agentDraw,
-        fire:   fire
+        name:         'agent1',
+        isAgent:      true,
+        pos:          [100, 200],
+        r:            20,
+        angle:        0,
+        v:            0, // linear vel
+        theta:        0, // angular vel
+        color:        '#FF0',
+        draw:         agentDraw,
+        fire:         fire,
+        energy:       1,
+        framesToFire: 0
     });
 
     scr.shapes.push({
-        isAgent: true,
-        pos:    [300, 200],
-        r:      20,
-        angle:  180,
-        v:      0,
-        theta:  0,
-        color:  '#0FF',
-        draw:   agentDraw,
-        fire:   fire
+        name:         'agent2',
+        isAgent:      true,
+        pos:          [300, 200],
+        r:            20,
+        angle:        180,
+        v:            0,
+        theta:        0,
+        color:        '#0FF',
+        draw:         agentDraw,
+        fire:         fire,
+        energy:       1,
+        framesToFire: 0
     });
 
     scr.shapes.push({
-        isAgent: true,
-        pos:    [500, 200],
-        r:      20,
-        angle:  180,
-        v:      0,
-        theta:  0,
-        color:  '#F0F',
-        draw:   agentDraw
+        name:         'agent3',
+        isAgent:      true,
+        pos:          [500, 200],
+        r:            20,
+        angle:        180,
+        v:            0,
+        theta:        0,
+        color:        '#F0F',
+        draw:         agentDraw,
+        energy:       1,
+        framesToFire: 0
     });
 
     // obstacles
 
     scr.shapes.push({
-        pos:    [120, 40],
-        r:      20,
-        color:  '#D00',
-        draw:   circleDraw
+        name:          'wall1',
+        undestroyable: true,
+        pos:           [120, 40],
+        r:             20,
+        color:         '#D00',
+        draw:          circleDraw
     });
 
     scr.shapes.push({
-        pos:    [120, 80],
-        r:      20,
-        color:  '#D00',
-        draw:   circleDraw
+        name:          'wall2',
+        undestroyable: true,
+        pos:           [120, 80],
+        r:             20,
+        color:         '#D00',
+        draw:          circleDraw
     });
 
     scr.shapes.push({
-        pos:    [120, 120],
-        r:      20,
-        color:  '#D00',
-        draw:   circleDraw
+        name:          'wall3',
+        undestroyable: true,
+        pos:           [120, 120],
+        r:             20,
+        color:         '#D00',
+        draw:          circleDraw
     });
 
 
@@ -206,40 +224,128 @@
         }
     ];
 
+    var removeItemFromArray = function(sh, arr) {
+        for (var i = 0, f = arr.length; i < f; ++i) {
+            if (arr[i] === sh) {
+                arr.splice(i, 1);
+                return true;
+            }
+            return false;
+        }
+    };
+
+    var updActor = function(sh, i) {
+        var sh2;
+
+        // update theta and v based on keys/random
+        if (i === 0 || i === 1) {
+            sh.theta = 0;
+            sh.v     = 0;
+                if (scr.keys[ agentKeys[i].left  ]) { sh.theta = -2; }
+                if (scr.keys[ agentKeys[i].right ]) { sh.theta =  2; }
+
+                if (!('keepV' in sh)) {
+                    if (scr.keys[ agentKeys[i].up    ]) { sh.v     =  4; }
+                    if (scr.keys[ agentKeys[i].down  ]) { sh.v     = -2; }
+                }
+
+                if (scr.keys[ agentKeys[i].fire ] && sh.framesToFire === 0) {
+                    sh.fire();
+                    sh.framesToFire = 50;
+                }
+        }
+        else if (sh.isAgent) {
+            sh.theta = Math.random() * 4 - 2;
+
+            if (!('keepV' in sh)) {
+                sh.v = Math.random() * 4 - 2;
+            }
+        }
+
+        if ('keepV' in sh) {
+            --sh.keepV;
+            if (sh.keepV === 0) {
+                delete sh.keepV;
+            }
+        }
+
+        // update pos and angle based on v, angle and theta
+        if (sh.theta !== 0) {
+            sh.angle += sh.theta;
+        }
+
+        if (sh.v !== 0) {
+            sh.pos = move(sh.pos, sh.v, sh.angle);
+        }
+
+        if (sh.framesToFire > 0) {
+            --sh.framesToFire;
+        }
+
+        if ('framesToDie' in sh) {
+            if (sh.framesToDie === 0) {
+                return true;
+            }
+            else {
+                --sh.framesToDie;
+            }
+        }
+
+        // check for collision against other shapes
+        for (var I = 0, F = scr.shapes.length; I < F; ++I) {
+            sh2 = scr.shapes[I];
+            if (sh === sh2) { continue; }
+            if (testCollision(sh, sh2)) {
+                if (sh.isCannonBall && !sh2.undestroyable) {
+                    console.log('killing ' + sh2.name);
+                    scr.removeShape(sh2);
+                    removeItemFromArray(sh2, actors);
+                    removeItemFromArray(sh2, obstacles);
+                    return true;    // remove sh too
+                }
+                else if ('v' in sh2) {
+                    console.log(sh.name + ' collided with actor ' + sh2.name);
+                    sh.v  *= -0.5;
+                    sh2.v *= -0.5;
+                    sh.keepV  = 20;
+                    sh2.keepV = 20;
+
+                    sh.pos  = move(sh.pos,  sh.v  * 3,  sh.angle);
+                    sh2.pos = move(sh2.pos, sh2.v * 3, sh2.angle);
+                }
+                else {
+                    console.log(sh.name + ' collided with obstacle ' + sh2.name);
+                    sh.v *= -1;
+                    sh.keepV = 20;
+
+                    sh.pos = move(sh.pos, sh.v * 2, sh.angle);
+                }
+            }
+        }
+
+        // setup aux vars
+        sh.shapes = [];
+        sh.rays   = {};
+
+        return false;
+    };
+
     var upd = function() {
-        var i, f, pair, comb, sh, sh2, ob;
+        var i, f, comb, pair, sh, sh2, ob, willDie;
+
 
         // update actors
         for (i = 0, f = actors.length; i < f; ++i) {
             sh = actors[i];
-            
-            // update theta and v based on keys/random
-            if (i === 0 || i === 1) {
-                sh.theta = 0;
-                sh.v     = 0;
-                    if (scr.keys[ agentKeys[i].left  ]) { sh.theta = -2; }
-                    if (scr.keys[ agentKeys[i].right ]) { sh.theta =  2; }
-                    if (scr.keys[ agentKeys[i].up    ]) { sh.v     =  4; }
-                    if (scr.keys[ agentKeys[i].down  ]) { sh.v     = -2; }
-                    if (scr.keys[ agentKeys[i].fire  ]) { sh.fire();     }
+            willDie = updActor(sh, i);
+            if (willDie) {
+                console.log('killing actor ' + sh.name);
+                
+                console.log( scr.removeShape(sh) );
+                console.log( removeItemFromArray(sh, actors) );
+                --i;
+                --f;
             }
-            else if (this.isAgent) {
-                sh.theta = Math.random() * 4 - 2;
-                sh.v     = Math.random() * 4 - 2;
-            }
-
-            // update pos and angle based on v, angle and theta
-            if (sh.theta !== 0) {
-                sh.angle += sh.theta;
-            }
-
-            if (sh.v !== 0) {
-                sh.pos = move(sh.pos, sh.v, sh.angle);
-            }
-
-            // setup aux vars
-            sh.shapes = [];
-            sh.rays = {};
         }
 
 
@@ -271,13 +377,15 @@
             sh = actors[i];
             if (!sh.isAgent) { continue; }
             for (k in sh.rays) {
-                ray = sh.rays[k];
-                sh.shapes.push({
-                    pos:    ray.from,
-                    pos2:   ray.to,
-                    color:  ray.against ? sh.color : '#777',
-                    draw:   lineDraw
-                });
+                if (sh.rays.hasOwnProperty(k)) {
+                    ray = sh.rays[k];
+                    sh.shapes.push({
+                        pos:    ray.from,
+                        pos2:   ray.to,
+                        color:  ray.against ? sh.color : '#777',
+                        draw:   lineDraw
+                    });
+                }
             }
         }
     };
@@ -288,6 +396,10 @@
     var testCollision = function(sh1, sh2) {
         var d = dist(sh1.pos, sh2.pos);
         return d < sh1.r + sh2.r;
+    };
+
+    var isOutOfBounds = function(sh) {
+        console.log(scr.dims);
     };
 
     var testVisibleCollision = function(sh1, sh2) {

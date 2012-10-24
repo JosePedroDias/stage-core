@@ -3,6 +3,7 @@ body {
     background-color:   #444;
     padding:            0;
     margin:             0;
+    overflow:           hidden;
 }
 
 .nnInterp {
