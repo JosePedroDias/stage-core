@@ -127,6 +127,7 @@
         v:            0, // linear vel
         theta:        0, // angular vel
         color:        '#FF0',
+        color2:       'rgba(255, 255, 0, 0.25)',
         draw:         agentDraw,
         fire:         fire,
         energy:       1,
@@ -142,6 +143,7 @@
         v:            0,
         theta:        0,
         color:        '#0FF',
+        color2:       'rgba(0, 255, 255, 0.25)',
         draw:         agentDraw,
         fire:         fire,
         energy:       1,
@@ -157,6 +159,7 @@
         v:            0,
         theta:        0,
         color:        '#F0F',
+        color2:       'rgba(255, 0, 255, 0.25)',
         draw:         agentDraw,
         energy:       1,
         framesToFire: 0
@@ -382,7 +385,7 @@
                     sh.shapes.push({
                         pos:    ray.from,
                         pos2:   ray.to,
-                        color:  ray.against ? sh.color : '#777',
+                        color:  ray.against ? sh.color : sh.color2,
                         draw:   lineDraw
                     });
                 }
