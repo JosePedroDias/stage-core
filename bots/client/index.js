@@ -24,7 +24,7 @@
             }
         });
 
-        scr.onFrame();
+        scr.run();
     };
 
     var onSessionAvailable = function(session, cfg) {

@@ -100,13 +100,12 @@
 
 
 
-    var scr = CS.createScreen({
-        scale:      1,
+    var scr = new CS.Screen({
+        //scale:      4,
         resize:     true,
         handleKeys: true
         //handleMouse: true
     });
-    document.body.appendChild(scr.el);
     window.scr = scr;   // make scr available
 
 
@@ -468,7 +467,7 @@
         };
     };
     
-    scr.onFrame();
+    scr.run();
 
     
 

@@ -11,7 +11,7 @@
 
 
 
-    var scr = CS.createScreen({
+    var scr = new CS.Screen({
         scale:      1,
         resize:     true,
         handleKeys: true
@@ -84,9 +84,6 @@
             ctx.globalAlpha = 1;
         ctx.restore();
     };
-
-    document.body.appendChild(scr.el);
-
 
 
     window.scr = scr;   // make scr available
